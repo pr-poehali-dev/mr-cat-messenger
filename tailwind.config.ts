@@ -13,11 +13,13 @@ export default {
 		container: {
 			center: true,
 			padding: '2rem',
-			screens: {
-				'2xl': '1400px'
-			}
+			screens: { '2xl': '1400px' }
 		},
 		extend: {
+			fontFamily: {
+				'golos': ['Golos Text', 'sans-serif'],
+				'rubik': ['Rubik', 'sans-serif'],
+			},
 			colors: {
 				border: 'hsl(var(--border))',
 				input: 'hsl(var(--input))',
@@ -61,6 +63,15 @@ export default {
 					'accent-foreground': 'hsl(var(--sidebar-accent-foreground))',
 					border: 'hsl(var(--sidebar-border))',
 					ring: 'hsl(var(--sidebar-ring))'
+				},
+				mrcat: {
+					orange: '#FF6B1A',
+					bg: '#0E1117',
+					sidebar: '#111520',
+					panel: '#161B26',
+					online: '#2ECC71',
+					purple: '#8B5CF6',
+					cyan: '#06B6D4',
 				}
 			},
 			borderRadius: {
@@ -70,20 +81,12 @@ export default {
 			},
 			keyframes: {
 				'accordion-down': {
-					from: {
-						height: '0'
-					},
-					to: {
-						height: 'var(--radix-accordion-content-height)'
-					}
+					from: { height: '0' },
+					to: { height: 'var(--radix-accordion-content-height)' }
 				},
 				'accordion-up': {
-					from: {
-						height: 'var(--radix-accordion-content-height)'
-					},
-					to: {
-						height: '0'
-					}
+					from: { height: 'var(--radix-accordion-content-height)' },
+					to: { height: '0' }
 				}
 			},
 			animation: {

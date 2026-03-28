@@ -1,14 +1,19 @@
-// Update this page (the content is just a fallback if you fail to update the page)
+import { useState } from "react";
+import AuthScreen from "@/components/mrcat/AuthScreen";
+import MessengerApp from "@/components/mrcat/MessengerApp";
 
-const Index = () => {
-  return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-100">
-      <div className="text-center">
-        <h1 className="text-4xl font-bold mb-4 color-black text-black">Добро пожаловать!</h1>
-        <p className="text-xl text-gray-600">тут будет отображаться ваш проект</p>
-      </div>
-    </div>
-  );
-};
+export default function Index() {
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [currentUser, setCurrentUser] = useState<{ email: string; name: string; avatar: string } | null>(null);
 
-export default Index;
+  const handleLogin = (email: string, name: string) => {
+    setCurrentUser({ email, name, avatar: "" });
+    setIsAuthenticated(true);
+  };
+
+  if (!isAuthenticated) {
+    return <AuthScreen onLogin={handleLogin} />;
+  }
+
+  return <MessengerApp user={currentUser!} onLogout={() => setIsAuthenticated(false)} />;
+}
