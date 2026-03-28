@@ -1,6 +1,9 @@
 import { useState } from "react";
 import Icon from "@/components/ui/icon";
 
+const SEND_CODE_URL = "https://functions.poehali.dev/403d55a9-2a8d-451c-9a49-900d4419ef3f";
+const VERIFY_CODE_URL = "https://functions.poehali.dev/1e8dfece-6399-40fa-986d-984b98c4ef29";
+
 interface AuthScreenProps {
   onLogin: (email: string, name: string) => void;
 }
@@ -15,37 +18,55 @@ export default function AuthScreen({ onLogin }: AuthScreenProps) {
   const [nickname, setNickname] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [shake, setShake] = useState(false);
+  const [errorMsg, setErrorMsg] = useState("");
 
-  const handleSendCode = () => {
-    if (!email.includes("@")) {
-      triggerShake();
-      return;
-    }
+  const handleSendCode = async () => {
+    if (!email.includes("@")) { triggerShake(); return; }
     setIsLoading(true);
-    setTimeout(() => {
-      setIsLoading(false);
+    setErrorMsg("");
+    try {
+      const res = await fetch(SEND_CODE_URL, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email }),
+      });
+      const data = await res.json();
+      if (!res.ok) { setErrorMsg(data.error || "Ошибка отправки"); triggerShake(); return; }
       setStep("code");
-    }, 1200);
+    } catch {
+      setErrorMsg("Нет соединения. Попробуйте снова.");
+      triggerShake();
+    } finally {
+      setIsLoading(false);
+    }
   };
 
-  const handleVerifyCode = () => {
+  const handleVerifyCode = async () => {
     const fullCode = code.join("");
-    if (fullCode.length < 6) {
-      triggerShake();
-      return;
-    }
+    if (fullCode.length < 6) { triggerShake(); return; }
     setIsLoading(true);
-    setTimeout(() => {
-      setIsLoading(false);
+    setErrorMsg("");
+    try {
+      const res = await fetch(VERIFY_CODE_URL, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, code: fullCode }),
+      });
+      const data = await res.json();
+      if (!res.ok) { setErrorMsg(data.error || "Неверный код"); triggerShake(); return; }
+      if (data.name) setName(data.name);
+      if (data.nickname) setNickname(data.nickname);
       setStep("profile");
-    }, 1000);
+    } catch {
+      setErrorMsg("Нет соединения. Попробуйте снова.");
+      triggerShake();
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const handleComplete = () => {
-    if (!name.trim()) {
-      triggerShake();
-      return;
-    }
+    if (!name.trim()) { triggerShake(); return; }
     onLogin(email, name.trim());
   };
 
@@ -154,6 +175,7 @@ export default function AuthScreen({ onLogin }: AuthScreenProps) {
                   autoFocus
                 />
               </div>
+              {errorMsg && step === "email" && <ErrorBanner msg={errorMsg} />}
               <button onClick={handleSendCode} disabled={isLoading}
                 className="w-full py-4 rounded-2xl font-bold text-white text-base transition-all duration-200 hover:scale-[1.02] active:scale-[0.98] disabled:opacity-60"
                 style={{ background: "linear-gradient(135deg, #FF6B1A, #FF4500)" }}>
@@ -196,6 +218,7 @@ export default function AuthScreen({ onLogin }: AuthScreenProps) {
                 ))}
               </div>
 
+              {errorMsg && step === "code" && <ErrorBanner msg={errorMsg} />}
               <button onClick={handleVerifyCode} disabled={isLoading}
                 className="w-full py-4 rounded-2xl font-bold text-white text-base transition-all duration-200 hover:scale-[1.02] active:scale-[0.98] disabled:opacity-60"
                 style={{ background: "linear-gradient(135deg, #FF6B1A, #FF4500)" }}>
@@ -281,5 +304,15 @@ function LoadingDots() {
         <span key={i} className="typing-dot w-2 h-2 rounded-full bg-white inline-block" />
       ))}
     </span>
+  );
+}
+
+function ErrorBanner({ msg }: { msg: string }) {
+  return (
+    <div className="flex items-center gap-2 px-4 py-3 rounded-xl animate-fade-in"
+      style={{ background: "rgba(239,68,68,0.1)", border: "1px solid rgba(239,68,68,0.25)" }}>
+      <Icon name="AlertCircle" size={15} style={{ color: "#EF4444" }} />
+      <span className="text-sm" style={{ color: "#EF4444" }}>{msg}</span>
+    </div>
   );
 }

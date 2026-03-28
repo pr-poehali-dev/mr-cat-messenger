@@ -1,0 +1,19 @@
+{
+  "tests": [
+    {
+      "name": "OPTIONS preflight",
+      "method": "OPTIONS",
+      "path": "/",
+      "expectedStatus": 200
+    },
+    {
+      "name": "Invalid email",
+      "method": "POST",
+      "path": "/",
+      "body": {"email": "notanemail"},
+      "expectedStatus": 400,
+      "expectedBody": {"error": "Некорректный email"},
+      "bodyMatcher": "partial"
+    }
+  ]
+}
